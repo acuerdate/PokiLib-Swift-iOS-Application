@@ -4,6 +4,7 @@ import Playgrounds
 struct HomeView: View {
     @StateObject var vm = ViewModel()
     @State private var selectedType: String? = nil
+    @State private var selectedPokemon: PokemonDetail? = nil 
     
     let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -40,7 +41,9 @@ struct HomeView: View {
                         
                         LazyVGrid(columns: columns, spacing: 10){
                             ForEach(vm.pokemonsList){pokemon in
-                                PokemonCard(pokemon: pokemon)
+                                PokemonCard(pokemon: pokemon, onTap: {
+                                    selectedPokemon = pokemon
+                                })
                             }
                         }
                         .padding(.vertical)
@@ -51,6 +54,10 @@ struct HomeView: View {
                 }
             }
         }
+        .sheet(item: $selectedPokemon){pokemon in
+            PokemonDetailSheet(pokemon: pokemon)
+        }
+        
         .task {
             if vm.pokemonsList.isEmpty{
                 await vm.FetchPokemonCards()

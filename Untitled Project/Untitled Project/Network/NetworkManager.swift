@@ -12,7 +12,7 @@ final class NetworkManager{
     private let decoder = JSONDecoder()
     
     private init(){
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
     }
     
     func getPokemonsList(urlString: String) async throws -> PokemonListResponse {
@@ -67,5 +67,19 @@ final class NetworkManager{
         }
         
         return try decoder.decode(TypeListResponse.self, from: data)
+    }
+    
+    func getPokemonSpecies(id: Int) async throws -> PokemonSpecies {
+        guard let url = URL(string: "https://pokeapi.co/api/v2/pokemon-species/\(id)/") else {
+            throw NetworkErrors.invalidURL
+        }
+        
+        let(data, response) = try await URLSession.shared.data(from: url)
+        
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw NetworkErrors.badResponse
+        }
+        
+        return try decoder.decode(PokemonSpecies.self, from: data)
     }
 }

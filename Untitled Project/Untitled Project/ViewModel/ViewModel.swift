@@ -47,4 +47,20 @@ final class ViewModel: ObservableObject{
             }
         }
     }
+    
+    func fetchPokemonDesc(id: Int) async -> String {
+        do {
+            let species = try await NetworkManager.shared.getPokemonSpecies(id: id)
+            
+            if let englishEntry = species.flavorTextEntries.first(where: { $0.language.name == "en" }) {
+                return englishEntry.flavorText
+                    .replacingOccurrences(of: "\n", with: " ")
+                    .replacingOccurrences(of: "\u{0C}", with: " ")
+            } else {
+                return "No description available."
+            }
+        } catch {
+            return "Failed to load description."
+        }
+    }
 }
